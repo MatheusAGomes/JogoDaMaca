@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" href="style.css">
+
+        <title>Jogo</title>
+    </head>
+
+    <body onkeydown="OnKeyDown(event)" onkeyup="OnKeyUp(event)">
+        <img id="cesta" width="0" height="0" src="./cesta-de-vime.png">
+        <img id="maca" width="0" height="0" src="./maca.png">
+        <img id="bomba" width="0" height="0" src="./bomba.png">
+
+        <div id="divCanvas">
+        <canvas id="myCanvas" style="border:1px solid #000000; background: url('./Fundo.jpg')" width="1000" height="500" ></canvas>
+        </div>
+        <div id="divPlacar">
+            <p id="placar">Placar</p>
+            <p id="erros">Erros</p>
+           <a href="./index.html"><input type="button"class="btn" value="Voltar"></a>
+        </div>
+        <script>
+            var img = document.getElementById("cesta");
+            var dropG = document.getElementById("maca");
+            var dropB = document.getElementById("bomba");
+            let sorteio;
+            let image = new Image()
+            image.src = './Fundo.jpg'
+            let index = 0 
+            let status = 1
+            var placar = 0;
+            var arrDrops=[{dropG,status}]
+            let objG = {dropG,status}
+            let objB = {dropB,status}
+
+            let erro = 0;
+            var x = 450;
+            var y = 420;
+            let posx = getRandomInt(0,1000);
+            let posy = 0;
+            var teclar = "";
+
+            var c = document.getElementById("myCanvas");
+            var ctx = c.getContext("2d");
+
+            ctx.clearRect(0, 0, 1000, 500);
+
+
+            function OnKeyDown(event) {
+                teclar = event;
+            }
+            function sortear() {
+                let status = 1
+
+                sorteio = getRandomInt(1,3)
+                console.log(sorteio)
+                if(sorteio == 1)
+                {
+                    console.log(objG)
+                    arrDrops.push({dropG,status})
+                }
+                else
+                {
+                    console.log(objG)
+                    arrDrops.push({dropB,status})
+                }
+            }
+
+            function OnKeyUp(event) {
+                teclar = "";
+            }
+
+            function Update() {
+
+                if (teclar.key == "ArrowRight") {
+                    x += 1;
+                } else if (teclar.key == "ArrowLeft") {
+                    x -= 1;
+                }
+                ctx.clearRect(0, 0, 1000, 500);
+                ctx.drawImage(img, x, y, 80, 80);
+                if (arrDrops[index].status == 1) {
+                    try {
+                        ctx.drawImage(arrDrops[index].dropG, posx, posy, 40, 40);
+                    } catch (error) {
+                        ctx.drawImage(arrDrops[index].dropB, posx, posy, 40, 40);
+
+                    }
+                }
+                if (capturado() == 1) {
+                    console.log(placar)
+                }
+                document.getElementById("placar").innerText = `Placar: ${placar}`
+                document.getElementById("erros").innerText = `Erros: ${erro}`
+                
+            }
+            
+            function capturado() {
+                if(((posx - x) <= 40 && (posx - x) > 0 ) || (-1*(posx - x) <= 40 && -1*(posx - x) > 0 ))
+                {
+                    if (posy == y) { 
+                        placar += 10
+                        if (arrDrops[index].dropB != undefined) {
+                            placar -= 20
+                            console.log("capturado")
+                            erro += 1
+                        } 
+                        arrDrops[index].status = 0
+                        clear()
+                        fim()
+                                             
+                        return 1
+                    }
+                }
+                return 0
+            }
+            function getRandomInt(min, max) {
+                min = Math.ceil(min);
+                max = Math.floor(max);
+                return Math.floor(Math.random() * (max - min) + min);
+            }
+            
+            function dropDeItens() {
+                
+                if (arrDrops[index].status == 1) {
+                    ctx.clearRect(0, 0, 1000, 500);
+                    console.log(arrDrops)
+                    try {
+                        ctx.drawImage(arrDrops[index].dropG, posx, posy, 40, 40);
+                    } catch (error) {
+                        ctx.drawImage(arrDrops[index].dropB, posx, posy, 40, 40);
+
+                    }
+                    if(posy >= 500)
+                        {
+                            if (arrDrops[index].dropB == undefined) {
+                                //caso nao seja bomba
+                                erro+=1
+                            }
+                            document.getElementById("erros").innerText = `Erros: ${erro}`
+                            
+                            arrDrops[index].status = 0
+                            clear()
+                            fim()
+                            
+
+                        }
+                    
+
+                }
+                  
+            }
+            function descida() {
+                posy = posy + 7 
+            }
+            function clear() {
+                ctx.clearRect(0, 0, 1000, 500);
+                
+                
+            }
+            function fim() {
+    
+                if (erro >= 3) {
+                    clearInterval(drops)
+                    clearInterval(queda)
+                    clearInterval(update)
+                    alert("Fim de jogo")
+                }
+                else
+                {
+                    sortear()
+                    index+=1
+                    posx = getRandomInt(0,1000);
+                    posy = 0;
+                }
+}
+            
+           let drops= setInterval(dropDeItens,1000)
+           let queda = setInterval(descida,40)
+           let update = setInterval(Update,1);
+        </script>
+        
+    </body>
+</html>
